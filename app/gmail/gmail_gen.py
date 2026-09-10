@@ -27,5 +27,31 @@ Rules:
 Output exactly:
 
 SUBJECT:<subject>
+BODY:<email body>
+User command:<command>
+"""
 
+url=(
+  f"https://generativelanguage.googleapis.com/"
+  f"vibeta/models/(MODEL):generateContent"
+)
 
+payload=(
+  "contents":[{"text":prompt}],
+"generationConfig":(
+  "temperature":0.7,
+  "maxoutputToken":800
+)
+)
+
+req=urllib.request.Request(
+  url,
+  data=json.dumps(payload).encode(),
+  headers={
+    "content-type":"application/json",
+    "x-goog-api-key":API_KEY
+  },
+  method="POST"
+)
+
+for attempt in range
