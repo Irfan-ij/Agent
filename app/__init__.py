@@ -1,87 +1,126 @@
 import os
-from flask import Flask, render_template,request,jsonify
-from app.youtube import youtube_bp
+
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 
-from app.gmail import {
-
+from app.gmail import (
     is_email_command,
     extract_email,
     create_gmail_url,
-    generate_gmail_with_gemini
-}
+    generate_email_with_gemini
+)
+
+from app.youtube import youtube_bp
 
 
 def create_app():
 
     app = Flask(__name__)
+
     CORS(app)
 
-    #youtube
+
+    # YouTube
     app.register_blueprint(
         youtube_bp,
         url_prefix="/youtube"
     )
 
-    #home
+
+    # Home
     @app.route("/")
     def home():
+
         return render_template("index.html")
 
-    #html
+
+    # HTML
     @app.route("/html")
     def html():
+
         return render_template("index.html")
 
-    #health 
+
+    # Health
     @app.route("/health")
     def health():
+
         return jsonify({
-            "status":"ok",
-            "service":"NOVA AI AGENT"
+            "status": "ok",
+            "service": "Nova AI Agent"
         })
 
-    # gmail ai agent
-    @app.route("/agent",methods["POST"])
+
+    # Gmail AI Agent
+    @app.route("/agent", methods=["POST"])
     def agent():
 
         try:
-            data=request.get_json(silent=true)or{}
-            command=data.get("command","").strip()
 
-    if not command:
-        return jsonify({
-            "success":false,
-            "message":"command is required"
-        }),400
+            data = request.get_json(
+                silent=True
+            ) or {}
 
-    if not is_email_command(command):
-        return jsonify({
-            "successs":false,
-            "message":"please give a Gmail command."
-        })400
+            command = data.get(
+                "command",
+                ""
+            ).strip()
 
-    recipient=extract_gmail(command)
 
-    email=generate_email_with_gemini(command)
+            if not command:
 
-    return jsonify({
-        "success":true,
-        "type":"email",
-        "email_generated":true,
-        "recipient":recipient,
-        "subject":email["subjuct"],
-        "body":email["body"],
-        "gmail_url":create_gmail_url(
-            email["subject"],
-            email["body"],
-            recipient
-        )
-    })
+                return jsonify({
+                    "success": False,
+                    "message": "Command is required"
+                }), 400
 
-except Expection as e:
-return jsonify({
-    "success":false,
-    "message":str(e)
-}),500
+
+            if not is_email_command(command):
+
+                return jsonify({
+                    "success": False,
+                    "message": "Please give a Gmail command."
+                }), 400
+
+
+            recipient = extract_email(
+                command
+            )
+
+
+            email = generate_email_with_gemini(
+                command
+            )
+
+
+            return jsonify({
+
+                "success": True,
+
+                "type": "email",
+
+                "email_generated": True,
+
+                "recipient": recipient,
+
+                "subject": email["subject"],
+
+                "body": email["body"],
+
+                "gmail_url": create_gmail_url(
+                    email["subject"],
+                    email["body"],
+                    recipient
+                )
+            })
+
+
+        except Exception as e:
+
+            return jsonify({
+                "success": False,
+                "message": str(e)
+            }), 500
+
+
     return app
